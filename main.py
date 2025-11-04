@@ -5,16 +5,12 @@ from spacy.pipeline import EntityRuler
 import customtkinter as ctk
 from tkinter import scrolledtext, END
 
-# ==================== Setup ====================
 
-# Set appearance
-ctk.set_appearance_mode("dark")  # dark mode
-ctk.set_default_color_theme("blue")  # nice blue accent
+ctk.set_appearance_mode("dark")  
+ctk.set_default_color_theme("blue")  
 
-# Load spaCy model
 nlp = spacy.load("en_core_web_sm")
 
-# ---------- Safe EntityRuler setup (fixed for spaCy v3+) ----------
 patterns = [
     {"label": "TECH_COMPANY", "pattern": "Microsoft"},
     {"label": "TECH_COMPANY", "pattern": "Google"},
@@ -34,7 +30,6 @@ ruler = nlp.get_pipe("entity_ruler")
 ruler.add_patterns(patterns)
 
 
-# ==================== Load CoNLL Dataset ====================
 
 def load_conll(file_path):
     """Reads a CoNLL-format file and returns a list of sentences."""
@@ -54,26 +49,21 @@ def load_conll(file_path):
             sentences.append(" ".join(words))
     return sentences
 
-# Load all 3 files (adjust paths if needed)
 train_sentences = load_conll("eng.train")
 testa_sentences = load_conll("eng.testa")
 testb_sentences = load_conll("eng.testb")
 
-# Combine all
 all_sentences = train_sentences + testa_sentences + testb_sentences
 
-# ==================== GUI Setup ====================
 
 root = ctk.CTk()
 root.title("Named Entity Recognition (NER) - CoNLL2003")
 root.geometry("900x700")
 
-# Configure grid layout
 root.grid_columnconfigure(0, weight=1)
 root.grid_rowconfigure(1, weight=1)
 root.grid_rowconfigure(2, weight=1)
 
-# Title Label
 title_label = ctk.CTkLabel(
     root,
     text="🧠 Named Entity Recognition (NER)",
@@ -82,7 +72,6 @@ title_label = ctk.CTkLabel(
 )
 title_label.grid(row=0, column=0, pady=20)
 
-# Text box for input
 input_box = scrolledtext.ScrolledText(
     root,
     wrap="word",
@@ -111,7 +100,6 @@ def analyze_text():
     result_box.delete("1.0", END)
 
     if mode == "Rule-based":
-        # Create a blank pipeline with only the entity ruler
         from spacy.lang.en import English
         nlp_rule = English()
         ruler = nlp_rule.add_pipe("entity_ruler")
@@ -119,14 +107,12 @@ def analyze_text():
         doc = nlp_rule(text)
 
     elif mode == "Model-based":
-        # Use the pretrained spaCy model only
         nlp_model = spacy.load("en_core_web_sm")
         doc = nlp_model(text)
 
-    else:  # Combined
+    else:  
         doc = nlp(text)
 
-    # Display entities
     if doc.ents:
         for ent in doc.ents:
             result_box.insert(END, f"{ent.text:<25} →  {ent.label_}\n")
@@ -135,13 +121,11 @@ def analyze_text():
     result_box.configure(state="disabled")
 
 
-# Function to load a random CoNLL sentence
 def load_random_sentence():
     sentence = random.choice(all_sentences)
     input_box.delete("1.0", END)
     input_box.insert("1.0", sentence)
 
-# --- NER mode selection (model-based, rule-based, or both) ---
 mode_label = ctk.CTkLabel(
     root,
     text="Select NER Mode:",
@@ -188,16 +172,15 @@ load_button = ctk.CTkButton(
 )
 load_button.grid(row=0, column=1, padx=10, pady=10)
 
-# Result box (dark theme but more readable text)
 result_box = scrolledtext.ScrolledText(
     root,
     wrap="word",
     width=100,
     height=12,
     font=("Consolas", 14, "bold"),
-    bg="#121212",       # deep dark gray
-    fg="#E0E0E0",       # bright gray-white text
-    insertbackground="#00BFFF",  # cyan cursor color
+    bg="#121212",       
+    fg="#E0E0E0",      
+    insertbackground="#00BFFF",  
     relief="flat",
     borderwidth=2,
 )
@@ -205,5 +188,4 @@ result_box.grid(row=3, column=0, padx=30, pady=20, sticky="nsew")
 result_box.configure(state="disabled")
 
 
-# Run the app
 root.mainloop()
